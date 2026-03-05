@@ -136,9 +136,12 @@ class ECRStudioApp(tk.Tk):
         ]
         for key, text, cmd, color_key in btn_defs:
             b = tk.Button(self.toolbar, text=text, command=cmd,
-                          bg=pal.get(color_key, "#3498db"), fg="white",
+                          bg=pal.get(color_key, "#3498db"),
+                          fg=pal.get("btn_fg", "#ffffff"),
                           relief="flat", font=("Segoe UI", 9, "bold"),
-                          padx=8, pady=3, cursor="hand2", bd=0)
+                          padx=8, pady=3, cursor="hand2", bd=0,
+                          activebackground=pal.get(color_key, "#3498db"),
+                          activeforeground=pal.get("btn_fg", "#ffffff"))
             b.pack(side="left", padx=2)
             self.toolbar_buttons[key] = (b, color_key)
 
@@ -167,8 +170,9 @@ class ECRStudioApp(tk.Tk):
         self.lbl_lines_title.pack(anchor="w", padx=6, pady=(4, 2))
 
         # Search / filter bar
-        sf = tk.Frame(self.left_frame, bg=pal["bg"])
-        sf.pack(fill="x", padx=6, pady=(0, 4))
+        self.search_frame = tk.Frame(self.left_frame, bg=pal["bg"])
+        self.search_frame.pack(fill="x", padx=6, pady=(0, 4))
+        sf = self.search_frame
 
         self.lbl_search = tk.Label(sf, text="Search:", bg=pal["bg"], fg=pal["text_fg"])
         self.lbl_search.pack(side="left")
@@ -287,12 +291,19 @@ class ECRStudioApp(tk.Tk):
         self.lbl_file.configure(bg=pal["toolbar_bg"], fg=pal["text_secondary"])
         self.lbl_modified.configure(bg=pal["toolbar_bg"], fg=pal["error_fg"])
 
+        btn_fg = pal.get("btn_fg", "#ffffff")
         for _key, (btn, color_key) in self.toolbar_buttons.items():
-            btn.configure(bg=pal.get(color_key, "#3498db"))
+            btn.configure(bg=pal.get(color_key, "#3498db"), fg=btn_fg,
+                          activebackground=pal.get(color_key, "#3498db"),
+                          activeforeground=btn_fg)
 
         self.left_frame.configure(bg=pal["bg"])
         self.right_frame.configure(bg=pal["bg"])
         self.lbl_lines_title.configure(bg=pal["bg"], fg=pal["text_fg"])
+        self.search_frame.configure(bg=pal["bg"])
+        self.lbl_search.configure(bg=pal["bg"], fg=pal["text_fg"])
+        self.search_entry.configure(bg=pal["entry_bg"], fg=pal["text_fg"],
+                                    insertbackground=pal["text_fg"])
         self.lbl_summary.configure(bg=pal["bg"], fg=pal["text_muted"])
         self.lbl_detail_title.configure(bg=pal["bg"], fg=pal["text_fg"])
         self.canvas.configure(bg=pal["bg"])
@@ -300,8 +311,8 @@ class ECRStudioApp(tk.Tk):
         self.main_paned.configure(bg=pal["sash_bg"])
         self.status.configure(bg=pal["status_bg"], fg=pal["status_fg"])
 
-        self.btn_apply.configure(bg=pal["btn_apply"])
-        self.btn_cancel_edit.configure(bg=pal["btn_cancel"])
+        self.btn_apply.configure(bg=pal["btn_apply"], fg=btn_fg)
+        self.btn_cancel_edit.configure(bg=pal["btn_cancel"], fg=btn_fg)
 
         # Update Treeview tags
         for t in ALL_TYPES:
