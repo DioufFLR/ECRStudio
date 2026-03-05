@@ -46,6 +46,27 @@ def save_theme(theme_name):
     _save_config(config)
 
 
+MAX_RECENT_FILES = 8
+
+
+def get_recent_files():
+    """Return the list of recently opened file paths."""
+    config = _load_config()
+    return config.get("recent_files", [])
+
+
+def add_recent_file(path):
+    """Add a file path to the recent files list (most recent first)."""
+    config = _load_config()
+    recent = config.get("recent_files", [])
+    # Remove if already present, then prepend
+    abs_path = os.path.abspath(path)
+    recent = [p for p in recent if p != abs_path]
+    recent.insert(0, abs_path)
+    config["recent_files"] = recent[:MAX_RECENT_FILES]
+    _save_config(config)
+
+
 class ThemeManager:
     """Manages the current theme and provides color lookups."""
 

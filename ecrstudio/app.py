@@ -11,7 +11,7 @@ from tkinter import ttk, filedialog, messagebox
 from .structures import STRUCTURES
 from .parser import read_field, write_field, get_record_type, read_ecr_file, save_ecr_file
 from .constants import ALL_TYPES, HIERARCHY_LEVEL
-from .themes import ThemeManager
+from .themes import ThemeManager, get_recent_files, add_recent_file
 from .undo import UndoManager
 from .validator import validate_file, ValidationError
 from .tree_builder import build_tree
@@ -65,6 +65,9 @@ class ECRStudioApp(tk.Tk):
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="New (Wizard)...", command=self._new_file, accelerator="Ctrl+N")
         file_menu.add_command(label="Open...", command=self._open_file, accelerator="Ctrl+O")
+        self.recent_menu = tk.Menu(file_menu, tearoff=0)
+        file_menu.add_cascade(label="Recent files", menu=self.recent_menu)
+        self._update_recent_menu()
         file_menu.add_separator()
         file_menu.add_command(label="Save", command=self._save, accelerator="Ctrl+S")
         file_menu.add_command(label="Save As...", command=self._save_as, accelerator="Ctrl+Shift+S")
@@ -420,12 +423,40 @@ class ECRStudioApp(tk.Tk):
     # File operations
     # ──────────────────────────────────────────────
 
+    def _update_recent_menu(self):
+        """Refresh the Recent files submenu."""
+        self.recent_menu.delete(0, "end")
+        recent = get_recent_files()
+        if not recent:
+            self.recent_menu.add_command(label="(no recent files)", state="disabled")
+            return
+        for path in recent:
+            name = os.path.basename(path)
+            self.recent_menu.add_command(
+                label=f"{name}  —  {path}",
+                command=lambda p=path: self._open_recent(p))
+
+    def _open_recent(self, path):
+        """Open a file from the recent files list."""
+        if not os.path.exists(path):
+            messagebox.showwarning("File not found", f"File no longer exists:\n{path}")
+            return
+        if self.modified and not self._confirm_discard():
+            return
+        self._load_file(path)
+
     def _open_file(self):
+        if self.modified and not self._confirm_discard():
+            return
         path = filedialog.askopenfilename(
             title="Open ECR file",
             filetypes=[("ECR files", "*.ecr *.ECR"), ("All", "*.*")])
         if not path:
             return
+        self._load_file(path)
+
+    def _load_file(self, path):
+        """Load an ECR file from disk."""
         try:
             self.lines = read_ecr_file(path)
             self.file_path = path
@@ -436,6 +467,8 @@ class ECRStudioApp(tk.Tk):
             self.lbl_file.config(text=name, fg=self.theme.palette["success_fg"])
             self.title(f"ECRStudio — {name}")
             self._refresh_list()
+            add_recent_file(path)
+            self._update_recent_menu()
             self._set_status(f"Opened: {path}  ({len(self.lines)} lines)")
         except Exception as e:
             messagebox.showerror("Error", f"Cannot open file:\n{e}")
@@ -553,7 +586,30 @@ class ECRStudioApp(tk.Tk):
                              values=(i + 1, t, preview), tags=(tag,))
 
         summary = "  ".join(f"{t}:{n}" for t, n in sorted(counters.items()))
-        self.lbl_summary.config(text=f"Total: {len(self.lines)} lines  |  {summary}")
+        stats = self._compute_stats()
+        self.lbl_summary.config(
+            text=f"Total: {len(self.lines)} lines  |  {summary}{stats}")
+
+    def _compute_stats(self):
+        """Compute debit/credit totals from MVT lines."""
+        total_d = 0.0
+        total_c = 0.0
+        for line in self.lines:
+            if get_record_type(line) == "MVT":
+                try:
+                    d = read_field(line, 47, 13).strip()
+                    total_d += float(d) if d else 0.0
+                except (ValueError, IndexError):
+                    pass
+                try:
+                    c = read_field(line, 60, 13).strip()
+                    total_c += float(c) if c else 0.0
+                except (ValueError, IndexError):
+                    pass
+        if total_d == 0 and total_c == 0:
+            return ""
+        balance = "OK" if abs(total_d - total_c) < 0.01 else "UNBALANCED"
+        return f"  |  Debit: {total_d:,.2f}  Credit: {total_c:,.2f}  [{balance}]"
 
     def _fill_tree_view(self):
         self.tree.delete(*self.tree.get_children())
@@ -567,7 +623,9 @@ class ECRStudioApp(tk.Tk):
             t = get_record_type(line)
             counters[t] = counters.get(t, 0) + 1
         summary = "  ".join(f"{t}:{n}" for t, n in sorted(counters.items()))
-        self.lbl_summary.config(text=f"Total: {len(self.lines)} lines  |  {summary}")
+        stats = self._compute_stats()
+        self.lbl_summary.config(
+            text=f"Total: {len(self.lines)} lines  |  {summary}{stats}")
 
     def _insert_tree_nodes(self, nodes, parent):
         for node in nodes:
