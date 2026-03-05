@@ -19,65 +19,9 @@ from .dialogs import AddLineDialog, SearchReplaceDialog, create_blank_line
 from .wizard import NewFileWizard
 from .export import export_to_csv
 from .diff import DiffWindow
+from .widgets import FlatButton
 
 APP_VERSION = "3.0.0"
-
-
-class FlatButton(tk.Frame):
-    """A flat button widget that respects bg/fg on macOS.
-
-    macOS Aqua ignores bg/fg on tk.Button, so we use a Frame+Label combo
-    with click bindings to simulate a button that works cross-platform.
-    """
-
-    def __init__(self, parent, text="", command=None, bg="#3498db", fg="#ffffff",
-                 font=("Segoe UI", 9, "bold"), padx=8, pady=3, **kwargs):
-        super().__init__(parent, bg=bg, cursor="hand2", bd=0, highlightthickness=0)
-        self._command = command
-        self._bg = bg
-        self._fg = fg
-
-        self._label = tk.Label(self, text=text, bg=bg, fg=fg, font=font,
-                               padx=padx, pady=pady, cursor="hand2")
-        self._label.pack(fill="both", expand=True)
-
-        # Bind click on both frame and label
-        for widget in (self, self._label):
-            widget.bind("<Button-1>", self._on_click)
-            widget.bind("<Enter>", self._on_enter)
-            widget.bind("<Leave>", self._on_leave)
-
-    def _on_click(self, event):
-        if self._command:
-            self._command()
-
-    def _on_enter(self, event):
-        # Lighten/darken on hover
-        self.configure(bg=self._hover_color())
-        self._label.configure(bg=self._hover_color())
-
-    def _on_leave(self, event):
-        self.configure(bg=self._bg)
-        self._label.configure(bg=self._bg)
-
-    def _hover_color(self):
-        """Create a slightly lighter version of the bg color for hover."""
-        try:
-            r, g, b = self.winfo_rgb(self._bg)
-            # Lighten by ~15%
-            r = min(65535, int(r * 1.15))
-            g = min(65535, int(g * 1.15))
-            b = min(65535, int(b * 1.15))
-            return f"#{r >> 8:02x}{g >> 8:02x}{b >> 8:02x}"
-        except Exception:
-            return self._bg
-
-    def update_colors(self, bg, fg):
-        """Update button colors (for theme switching)."""
-        self._bg = bg
-        self._fg = fg
-        self.configure(bg=bg)
-        self._label.configure(bg=bg, fg=fg)
 
 
 class ECRStudioApp(tk.Tk):
