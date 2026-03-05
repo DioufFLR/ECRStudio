@@ -1,0 +1,5 @@
+# ECRStudio uses only Python standard library (tkinter, csv, os, copy)
+# No external dependencies required
+
+# Build tools (optional, for generating .exe)
+# pyinstaller>=6.0

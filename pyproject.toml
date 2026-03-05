@@ -1,0 +1,14 @@
+[project]
+name = "ecrstudio"
+version = "3.0.0"
+description = "Graphical editor for ECR files (ISACOMPTA Connect / ISAgri)"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Geoffrey FLEUR"},
+]
+keywords = ["ecr", "isacompta", "isagri", "accounting", "editor"]
+
+[project.scripts]
+ecrstudio = "ecrstudio.app:main"
