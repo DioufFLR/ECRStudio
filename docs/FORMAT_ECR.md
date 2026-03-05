@@ -2,7 +2,7 @@
 
 ## Overview
 
-ECR (Ecriture Comptable Recapitulative) is a fixed-width positional text format used by **ISACOMPTA Connect** to import accounting data.
+ECR (Ecriture Comptable Recapitulative) is a fixed-width positional text format used to import accounting data.
 
 ## Encoding rules
 
@@ -128,4 +128,4 @@ Key fields:
 | 39 | 10 | Alpha | Yes | VAT account |
 | 49 | 5 | Num | Yes | Rate |
 
-For the complete field listing of all record types, refer to the `ecrstudio/structures.py` source file which contains the full ISAgri specification.
+For the complete field listing of all record types, refer to the `ecrstudio/structures.py` source file which contains the full ECR specification.

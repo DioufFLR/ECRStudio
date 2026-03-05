@@ -2,7 +2,7 @@
 ECR file parser and field manipulation utilities.
 
 Handles reading/writing ECR files in ANSI (latin-1) encoding with \\r\\n line endings,
-and extracting/writing positional fields according to ISAgri specifications.
+and extracting/writing positional fields according to the ECR format specifications.
 """
 
 

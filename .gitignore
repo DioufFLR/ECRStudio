@@ -31,3 +31,9 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Legacy files (v2.0)
+editeur_ecr_gui.py
+INSTRUCTIONS_EXE.txt
+PROMPT_CONTEXTE_OPUS.txt
+exemple.ECR

@@ -2,7 +2,7 @@
 ECR record type structures.
 
 Each structure maps field positions to (name, length, type, required) tuples.
-Positions are 1-based as per the ISAgri documentation.
+Positions are 1-based as per the official ECR format documentation.
 Types: "Alpha" (left-aligned, space-padded), "Num" (right-aligned, zero-padded), "Date" (jjmmaaaa).
 """
 

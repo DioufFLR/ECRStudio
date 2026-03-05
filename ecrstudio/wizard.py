@@ -106,7 +106,7 @@ class NewFileWizard(tk.Toplevel):
 
     def _step_ver(self):
         self._add_field("File label:", "ver_libelle", "New ECR file", 30)
-        self._add_field("Min ISACOMPTA version:", "ver_version", "0200000", 10)
+        self._add_field("Min ECR version:", "ver_version", "0200000", 10)
 
     def _step_dos(self):
         self._add_field("Folder code (8 chars max):", "dos_code", "", 10)

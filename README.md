@@ -1,8 +1,20 @@
-# ECRStudio
+<p align="center">
+  <h1 align="center">ECRStudio</h1>
+  <p align="center">Graphical editor for ECR accounting files</p>
+</p>
 
-Editeur graphique pour fichiers **ECR** (Ecriture Comptable Recapitulative) utilises par **ISACOMPTA Connect** (ISAgri / Bobbee).
+<p align="center">
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white" alt="Python"></a>
+  <a href="https://github.com/DioufFLR/ECRStudio/blob/main/LICENSE"><img src="https://img.shields.io/github/license/DioufFLR/ECRStudio?color=blue" alt="License"></a>
+  <a href="https://github.com/DioufFLR/ECRStudio"><img src="https://img.shields.io/github/stars/DioufFLR/ECRStudio?style=social" alt="Stars"></a>
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platform">
+  <img src="https://img.shields.io/badge/GUI-tkinter-orange" alt="tkinter">
+  <img src="https://img.shields.io/badge/Dependencies-zero-brightgreen" alt="Zero deps">
+</p>
 
-Les fichiers ECR sont des fichiers texte a format positionnel strict (largeur fixe) permettant d'importer des donnees comptables dans ISACOMPTA.
+---
+
+Full-featured desktop editor for **ECR** files (Ecriture Comptable Recapitulative) — fixed-width positional text files used to import accounting data.
 
 ## Features
 
@@ -48,19 +60,28 @@ brew install python@3.12
 # or if already installed:
 python3 --version
 
-# Windows
-# Download from https://www.python.org/downloads/
+# Windows — download from https://www.python.org/downloads/
 ```
 
 ### Run
 
 ```bash
-git clone https://github.com/geoffreyfleur/ECRStudio.git
+git clone https://github.com/DioufFLR/ECRStudio.git
 cd ECRStudio
 python3 main.py
 ```
 
-### Build standalone .exe (Windows)
+### macOS — quick launch
+
+```bash
+# Double-click ECRStudio.command in Finder
+# Or add an alias:
+echo "alias ecrstudio='python3 ~/projets/ECRStudio/main.py'" >> ~/.zshrc
+source ~/.zshrc
+ecrstudio
+```
+
+### Windows — build standalone .exe
 
 ```bash
 pip install pyinstaller
@@ -102,9 +123,10 @@ Key rules:
 ```
 ECRStudio/
 ├── main.py                 # Entry point
+├── ECRStudio.command        # macOS double-click launcher
 ├── ecrstudio/
 │   ├── app.py              # Main application window
-│   ├── structures.py       # ECR field definitions
+│   ├── structures.py       # ECR field definitions (11 record types)
 │   ├── parser.py           # File I/O and field manipulation
 │   ├── constants.py        # Colors, hierarchy, themes
 │   ├── themes.py           # Dark/light theme manager
@@ -129,4 +151,4 @@ MIT - See [LICENSE](LICENSE)
 
 ## Author
 
-Geoffrey FLEUR — QA Tester @ Bobbee / ISAgri
+Geoffrey FLEUR — QA @ Bobbee

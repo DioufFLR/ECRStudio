@@ -1,14 +1,14 @@
 [project]
 name = "ecrstudio"
 version = "3.0.0"
-description = "Graphical editor for ECR files (ISACOMPTA Connect / ISAgri)"
+description = "Graphical editor for ECR accounting files"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
     {name = "Geoffrey FLEUR"},
 ]
-keywords = ["ecr", "isacompta", "isagri", "accounting", "editor"]
+keywords = ["ecr", "accounting", "editor", "bobbee"]
 
 [project.scripts]
 ecrstudio = "ecrstudio.app:main"

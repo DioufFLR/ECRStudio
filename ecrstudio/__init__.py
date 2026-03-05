@@ -1,3 +1,3 @@
-"""ECRStudio - Graphical editor for ECR files (ISACOMPTA Connect / ISAgri)."""
+"""ECRStudio - Graphical editor for ECR accounting files."""
 
 __version__ = "3.0.0"

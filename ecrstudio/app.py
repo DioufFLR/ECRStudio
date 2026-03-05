@@ -1,7 +1,7 @@
 """
 ECRStudio — Main application window.
 
-Full-featured graphical editor for ECR files (ISACOMPTA Connect / ISAgri).
+Full-featured graphical editor for ECR accounting files.
 """
 
 import os
@@ -1048,9 +1048,8 @@ class ECRStudioApp(tk.Tk):
         messagebox.showinfo(
             "About ECRStudio",
             f"ECRStudio v{APP_VERSION}\n\n"
-            "Graphical editor for ECR files\n"
-            "(ISACOMPTA Connect / ISAgri)\n\n"
-            "Author: Geoffrey FLEUR\n"
+            "Graphical editor for ECR accounting files\n\n"
+            "Author: Geoffrey FLEUR @ Bobbee\n"
             "License: MIT"
         )
 
