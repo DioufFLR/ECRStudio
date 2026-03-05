@@ -39,6 +39,7 @@ class ECRStudioApp(tk.Tk):
 
         self.theme = ThemeManager()
         self.undo_mgr = UndoManager()
+        self._font_size = 11  # Base font size (adjustable via Ctrl+/-)
 
         self.title(f"ECRStudio v{APP_VERSION}")
         self.geometry("1350x820")
@@ -47,6 +48,7 @@ class ECRStudioApp(tk.Tk):
         self._build_menu_bar()
         self._build_ui()
         self._apply_theme()
+        self._apply_zoom()
         self._bind_shortcuts()
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
@@ -92,6 +94,10 @@ class ECRStudioApp(tk.Tk):
         view_menu.add_command(label="Toggle List / Tree", command=self._toggle_view)
         view_menu.add_separator()
         view_menu.add_command(label="Toggle Dark / Light", command=self._toggle_theme)
+        view_menu.add_separator()
+        view_menu.add_command(label="Zoom In", command=self._zoom_in, accelerator="Ctrl++")
+        view_menu.add_command(label="Zoom Out", command=self._zoom_out, accelerator="Ctrl+-")
+        view_menu.add_command(label="Reset Zoom", command=self._zoom_reset, accelerator="Ctrl+0")
         menubar.add_cascade(label="View", menu=view_menu)
 
         # Tools menu
@@ -328,6 +334,50 @@ class ECRStudioApp(tk.Tk):
         self._set_status(f"Theme switched to {self.theme.name}")
 
     # ──────────────────────────────────────────────
+    # Zoom
+    # ──────────────────────────────────────────────
+
+    def _zoom_in(self):
+        if self._font_size < 20:
+            self._font_size += 1
+            self._apply_zoom()
+
+    def _zoom_out(self):
+        if self._font_size > 8:
+            self._font_size -= 1
+            self._apply_zoom()
+
+    def _zoom_reset(self):
+        self._font_size = 11
+        self._apply_zoom()
+
+    def _apply_zoom(self):
+        """Reapply fonts at current zoom level and refresh detail."""
+        fs = self._font_size
+        fs_small = max(fs - 2, 7)
+        fs_mono = max(fs - 1, 8)
+
+        # Update treeview row height via style
+        style = ttk.Style()
+        style.configure("Treeview", font=("Segoe UI", fs_small), rowheight=int(fs * 1.8))
+        style.configure("Treeview.Heading", font=("Segoe UI", fs_small, "bold"))
+
+        # Update fixed labels
+        self.lbl_title.configure(font=("Segoe UI", fs + 2, "bold"))
+        self.lbl_lines_title.configure(font=("Segoe UI", fs, "bold"))
+        self.lbl_detail_title.configure(font=("Segoe UI", fs, "bold"))
+        self.lbl_summary.configure(font=("Segoe UI", fs_small))
+        self.lbl_file.configure(font=("Segoe UI", fs_small))
+        self.status.configure(font=("Segoe UI", fs_small))
+        self.search_entry.configure(font=("Consolas", fs_mono))
+
+        # Refresh detail panel if a line is selected
+        if self.selected_line is not None:
+            self._show_detail(self.selected_line)
+
+        self._set_status(f"Zoom: {fs}pt")
+
+    # ──────────────────────────────────────────────
     # Keyboard shortcuts
     # ──────────────────────────────────────────────
 
@@ -346,6 +396,11 @@ class ECRStudioApp(tk.Tk):
         self.bind("<Control-Up>", lambda e: self._move_line_up())
         self.bind("<Control-Down>", lambda e: self._move_line_down())
         self.bind("<F5>", lambda e: self._validate())
+        # Zoom shortcuts
+        self.bind("<Control-plus>", lambda e: self._zoom_in())
+        self.bind("<Control-equal>", lambda e: self._zoom_in())
+        self.bind("<Control-minus>", lambda e: self._zoom_out())
+        self.bind("<Control-0>", lambda e: self._zoom_reset())
 
     # ──────────────────────────────────────────────
     # Canvas scrolling
@@ -604,24 +659,33 @@ class ECRStudioApp(tk.Tk):
         self.lbl_detail_title.config(
             text=f"Line {idx + 1}  —  Type: {rec_type}  —  Length: {len(line)} chars")
 
+        fs = self._font_size
+        fs_small = max(fs - 2, 7)
+        fs_mono = max(fs - 1, 8)
+        font_hdr = ("Segoe UI", fs_small, "bold")
+        font_cell = ("Segoe UI", fs_small)
+        font_mono = ("Consolas", fs_mono)
+
         if struct is None:
             tk.Label(self.detail_frame, text=f"Type '{rec_type}': no structure defined",
                      bg=pal["bg"], fg=pal["text_fg"],
-                     font=("Segoe UI", 9, "italic")).grid(
+                     font=("Segoe UI", fs_small, "italic")).grid(
                 row=0, column=0, columnspan=6, sticky="w", padx=6, pady=4)
             tk.Label(self.detail_frame, text=line, bg=pal["entry_alt_bg"],
-                     fg=pal["text_fg"], font=("Consolas", 9), relief="solid", bd=1,
+                     fg=pal["text_fg"], font=font_mono, relief="solid", bd=1,
                      wraplength=560, justify="left").grid(
                 row=1, column=0, columnspan=6, sticky="w", padx=6)
             return
 
         # Headers: Pos, Len, Type, Req, Field, Value
-        headers = [("Pos", 40), ("Len", 45), ("Type", 50), ("Req", 35), ("Field", 200), ("Value", 300)]
+        # Compact widths for Pos/Len/Type/Req; Field and Value get more space
+        headers = [("Pos", 3), ("Len", 3), ("Type", 5), ("Req", 3), ("Field", 22), ("Value", 0)]
         for col, (txt, w) in enumerate(headers):
-            tk.Label(self.detail_frame, text=txt, bg=pal["header_bg"], fg=pal["header_fg"],
-                     font=("Segoe UI", 8, "bold"), width=w // 8,
-                     anchor="w", padx=4, pady=3).grid(
-                row=0, column=col, sticky="ew", padx=1, pady=1)
+            lbl = tk.Label(self.detail_frame, text=txt, bg=pal["header_bg"], fg=pal["header_fg"],
+                           font=font_hdr, anchor="w", padx=4, pady=2)
+            if w > 0:
+                lbl.configure(width=w)
+            lbl.grid(row=0, column=col, sticky="ew", padx=1, pady=1)
 
         for row, (position, (name, length, field_type, required)) in enumerate(
                 sorted(struct.items()), start=1):
@@ -630,27 +694,27 @@ class ECRStudioApp(tk.Tk):
             fg = pal["text_fg"]
 
             tk.Label(self.detail_frame, text=str(position), bg=bg, fg=fg,
-                     font=("Consolas", 9), anchor="e", padx=4).grid(
+                     font=font_mono, anchor="e", width=3, padx=2).grid(
                 row=row, column=0, sticky="ew", padx=1, pady=1)
 
             tk.Label(self.detail_frame, text=str(length), bg=bg, fg=fg,
-                     font=("Consolas", 9), anchor="e", padx=4).grid(
+                     font=font_mono, anchor="e", width=3, padx=2).grid(
                 row=row, column=1, sticky="ew", padx=1, pady=1)
 
             tk.Label(self.detail_frame, text=field_type, bg=bg,
                      fg=ft_colors.get(field_type, fg),
-                     font=("Segoe UI", 8, "bold"), padx=4).grid(
+                     font=("Segoe UI", fs_small, "bold"), width=5, padx=2).grid(
                 row=row, column=2, sticky="ew", padx=1, pady=1)
 
             # Required indicator
             req_text = "OBL" if required else ""
             req_fg = pal["error_fg"] if required else pal["text_muted"]
             tk.Label(self.detail_frame, text=req_text, bg=bg, fg=req_fg,
-                     font=("Segoe UI", 8, "bold"), padx=2).grid(
+                     font=("Segoe UI", fs_small, "bold"), width=3, padx=2).grid(
                 row=row, column=3, sticky="ew", padx=1, pady=1)
 
             tk.Label(self.detail_frame, text=name, bg=bg, fg=fg,
-                     font=("Segoe UI", 9), anchor="w", padx=6).grid(
+                     font=font_cell, anchor="w", padx=4).grid(
                 row=row, column=4, sticky="ew", padx=1, pady=1)
 
             entry_bg = bg
@@ -658,7 +722,7 @@ class ECRStudioApp(tk.Tk):
             if required and not value.strip():
                 entry_bg = "#ffcccc" if not self.theme.is_dark else "#4d1a1a"
 
-            entry = tk.Entry(self.detail_frame, font=("Consolas", 9),
+            entry = tk.Entry(self.detail_frame, font=font_mono,
                              relief="solid", bd=1, bg=entry_bg, fg=fg)
             entry.insert(0, value)
             entry.grid(row=row, column=5, sticky="ew", padx=2, pady=1)
