@@ -25,7 +25,4 @@ jobs:
         run: pip install pytest pytest-cov
 
       - name: Run tests with coverage
-        run: python -m pytest tests/ -v --tb=short --cov=ecrstudio --cov-report=term-missing
-
-      - name: Check coverage threshold
-        run: python -m pytest tests/ --cov=ecrstudio --cov-fail-under=80 -q
+        run: python -m pytest -v --tb=short --cov --cov-report=term-missing

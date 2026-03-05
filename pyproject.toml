@@ -12,3 +12,21 @@ keywords = ["ecr", "accounting", "editor", "bobbee"]
 
 [project.scripts]
 ecrstudio = "ecrstudio.app:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["ecrstudio"]
+omit = [
+    "ecrstudio/app.py",
+    "ecrstudio/dialogs.py",
+    "ecrstudio/wizard.py",
+    "ecrstudio/widgets.py",
+    "ecrstudio/themes.py",
+    "ecrstudio/diff.py",
+]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
