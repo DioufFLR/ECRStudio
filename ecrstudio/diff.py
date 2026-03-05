@@ -6,6 +6,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 from .parser import read_ecr_file, get_record_type, read_field
 from .structures import STRUCTURES
+from .widgets import FlatButton
 
 
 class DiffResult:
@@ -106,22 +107,24 @@ class DiffWindow(tk.Toplevel):
                  fg=pal.get("toolbar_fg", "white"),
                  font=("Segoe UI", 11, "bold")).pack(side="left", padx=12)
 
-        tk.Button(toolbar, text="Open file to compare...",
-                  command=self._open_right_file,
-                  bg="#3498db", fg="white", relief="flat",
-                  font=("Segoe UI", 9, "bold"), padx=10).pack(side="left", padx=4)
+        FlatButton(toolbar, text="Open file to compare...",
+                   command=self._open_right_file,
+                   bg="#3498db", fg="white",
+                   font=("Segoe UI", 9, "bold"), padx=10).pack(side="left", padx=4)
 
-        self._btn_prev = tk.Button(toolbar, text="< Prev diff",
-                                   command=self._prev_diff,
-                                   bg="#e67e22", fg="white", relief="flat",
-                                   font=("Segoe UI", 9, "bold"), padx=8, state="disabled")
+        self._btn_prev = FlatButton(toolbar, text="< Prev diff",
+                                    command=self._prev_diff,
+                                    bg="#e67e22", fg="white",
+                                    font=("Segoe UI", 9, "bold"), padx=8)
         self._btn_prev.pack(side="left", padx=4)
+        self._btn_prev.set_enabled(False)
 
-        self._btn_next = tk.Button(toolbar, text="Next diff >",
-                                   command=self._next_diff,
-                                   bg="#e67e22", fg="white", relief="flat",
-                                   font=("Segoe UI", 9, "bold"), padx=8, state="disabled")
+        self._btn_next = FlatButton(toolbar, text="Next diff >",
+                                    command=self._next_diff,
+                                    bg="#e67e22", fg="white",
+                                    font=("Segoe UI", 9, "bold"), padx=8)
         self._btn_next.pack(side="left", padx=4)
+        self._btn_next.set_enabled(False)
 
         self._lbl_stats = tk.Label(toolbar, text="", bg=pal.get("toolbar_bg", "#2c3e50"),
                                    fg=pal.get("toolbar_fg", "white"),
@@ -159,11 +162,21 @@ class DiffWindow(tk.Toplevel):
         # Populate left
         self._fill_tree(self._tree_left, lines_left)
 
-        # Configure tags
+        # Configure tags — adapt colors based on theme
+        is_dark = pal.get("bg", "#f0f2f5").lower() in ("#1e1e2e", "#2b2b3d", "#252536")
+        if is_dark:
+            tag_added = "#1a3a2a"
+            tag_removed = "#3a1a1a"
+            tag_modified = "#3a3a1a"
+        else:
+            tag_added = "#d4edda"
+            tag_removed = "#f8d7da"
+            tag_modified = "#fff3cd"
+
         for tree in (self._tree_left, self._tree_right):
-            tree.tag_configure("added", background="#d4edda")
-            tree.tag_configure("removed", background="#f8d7da")
-            tree.tag_configure("modified", background="#fff3cd")
+            tree.tag_configure("added", background=tag_added)
+            tree.tag_configure("removed", background=tag_removed)
+            tree.tag_configure("modified", background=tag_modified)
 
     def _create_tree(self, parent):
         frame = tk.Frame(parent)
@@ -234,9 +247,9 @@ class DiffWindow(tk.Toplevel):
         self._lbl_stats.config(text=f"{diff_count} difference(s) found")
         self._diff_index = -1
 
-        state = "normal" if diff_count > 0 else "disabled"
-        self._btn_prev.config(state=state)
-        self._btn_next.config(state=state)
+        enabled = diff_count > 0
+        self._btn_prev.set_enabled(enabled)
+        self._btn_next.set_enabled(enabled)
 
     def _get_diff_indices(self):
         return [i for i, dr in enumerate(self._diff_results) if dr.status != DiffResult.EQUAL]

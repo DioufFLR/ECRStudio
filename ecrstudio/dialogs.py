@@ -9,6 +9,7 @@ from tkinter import ttk, messagebox
 from .structures import STRUCTURES
 from .parser import write_field
 from .constants import ALL_TYPES, HIERARCHY, HIERARCHY_LEVEL
+from .widgets import FlatButton
 
 
 class AddLineDialog(tk.Toplevel):
@@ -17,7 +18,7 @@ class AddLineDialog(tk.Toplevel):
     def __init__(self, parent, insert_after_type=None, theme_palette=None):
         super().__init__(parent)
         self.title("Add a line")
-        self.geometry("400x200")
+        self.geometry("400x230")
         self.resizable(False, False)
         self.transient(parent)
         self.grab_set()
@@ -31,32 +32,49 @@ class AddLineDialog(tk.Toplevel):
         tk.Label(self, text="Record type:", bg=bg, fg=fg,
                  font=("Segoe UI", 10)).pack(pady=(16, 4))
 
-        # Filter valid child types if inserting after a known type
-        valid_types = list(STRUCTURES.keys())
+        # Show all types, but suggest children of the selected type first
+        suggested = []
         if insert_after_type and insert_after_type in HIERARCHY:
-            children = HIERARCHY[insert_after_type]
-            if children:
-                valid_types = children
+            suggested = HIERARCHY[insert_after_type]
 
-        self.type_var = tk.StringVar(value=valid_types[0] if valid_types else "ECR")
-        combo = ttk.Combobox(self, textvariable=self.type_var, values=valid_types,
+        all_types = list(STRUCTURES.keys())
+        if suggested:
+            # Put suggested types first, then a separator, then the rest
+            other_types = [t for t in all_types if t not in suggested]
+            display_types = suggested + ["───────"] + other_types
+            default = suggested[0]
+        else:
+            display_types = all_types
+            default = "ECR"
+
+        self.type_var = tk.StringVar(value=default)
+        combo = ttk.Combobox(self, textvariable=self.type_var, values=display_types,
                              state="readonly", width=15, font=("Segoe UI", 10))
         combo.pack(pady=4)
 
+        hint = f"Suggested for {insert_after_type}: {', '.join(suggested)}" if suggested else ""
+        self._lbl_hint = tk.Label(self, text=hint,
+                                  bg=bg, fg=pal.get("success_fg", "#27ae60"),
+                                  font=("Segoe UI", 8, "italic"))
+        self._lbl_hint.pack(pady=(0, 2))
+
         tk.Label(self, text="A blank line with required fields will be created.",
-                 bg=bg, fg=fg, font=("Segoe UI", 8, "italic")).pack(pady=8)
+                 bg=bg, fg=fg, font=("Segoe UI", 8, "italic")).pack(pady=4)
 
         btn_frame = tk.Frame(self, bg=bg)
         btn_frame.pack(pady=8)
-        tk.Button(btn_frame, text="Add", command=self._on_ok,
-                  bg="#27ae60", fg="white", font=("Segoe UI", 9, "bold"),
-                  relief="flat", padx=16, pady=4).pack(side="left", padx=4)
-        tk.Button(btn_frame, text="Cancel", command=self.destroy,
-                  bg="#e74c3c", fg="white", font=("Segoe UI", 9, "bold"),
-                  relief="flat", padx=16, pady=4).pack(side="left", padx=4)
+        FlatButton(btn_frame, text="Add", command=self._on_ok,
+                   bg=pal.get("btn_apply", "#27ae60"), fg="white",
+                   padx=16, pady=4).pack(side="left", padx=4)
+        FlatButton(btn_frame, text="Cancel", command=self.destroy,
+                   bg=pal.get("btn_cancel", "#e74c3c"), fg="white",
+                   padx=16, pady=4).pack(side="left", padx=4)
 
     def _on_ok(self):
-        self.result = self.type_var.get()
+        val = self.type_var.get()
+        if val.startswith("─") or val not in STRUCTURES:
+            return
+        self.result = val
         self.destroy()
 
 
@@ -127,9 +145,8 @@ class SearchReplaceDialog(tk.Toplevel):
             ("Replace all",  self._do_replace_all, "#8e44ad"),
             ("Close",        self.destroy,          "#7f8c8d"),
         ]:
-            tk.Button(bf, text=text, command=cmd, bg=color, fg="white",
-                      font=("Segoe UI", 9, "bold"), relief="flat",
-                      padx=10, pady=3).pack(side="left", padx=3)
+            FlatButton(bf, text=text, command=cmd, bg=color, fg="white",
+                       padx=10, pady=3).pack(side="left", padx=3)
 
     def _do_search(self):
         self._on_search(self.search_var.get(), self.case_var.get())
