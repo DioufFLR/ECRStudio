@@ -318,11 +318,8 @@ class ECRStudioApp(tk.Tk):
         # Update Treeview tags
         for t in ALL_TYPES:
             bg_color = type_colors.get(t, pal["bg"])
-            fg_color = type_text.get(t, "") if self.theme.is_dark else ""
-            if fg_color:
-                self.tree.tag_configure(t, background=bg_color, foreground=fg_color)
-            else:
-                self.tree.tag_configure(t, background=bg_color)
+            fg_color = type_text.get(t, "#000000") if self.theme.is_dark else "#000000"
+            self.tree.tag_configure(t, background=bg_color, foreground=fg_color)
 
         # Refresh detail if a line is selected
         if self.selected_line is not None:
