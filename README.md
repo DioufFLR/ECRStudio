@@ -10,6 +10,7 @@
   <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platform">
   <img src="https://img.shields.io/badge/GUI-tkinter-orange" alt="tkinter">
   <img src="https://img.shields.io/badge/Dependencies-zero-brightgreen" alt="Zero deps">
+  <a href="https://github.com/DioufFLR/ECRStudio/actions/workflows/tests.yml"><img src="https://github.com/DioufFLR/ECRStudio/actions/workflows/tests.yml/badge.svg?branch=dev" alt="Tests"></a>
 </p>
 
 ---
